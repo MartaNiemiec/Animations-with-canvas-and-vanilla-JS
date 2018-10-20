@@ -115,6 +115,9 @@ var mouse = {
 
 var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66'];
 
+var gravity = 1;
+var friction = 0.89;
+
 // Event Listeners
 addEventListener('mousemove', function (event) {
     mouse.x = event.clientX;
@@ -128,46 +131,82 @@ addEventListener('resize', function () {
     init();
 });
 
+addEventListener('click', function () {
+    init();
+});
+
+// Utility Functions
+var randomIntFromRange = function randomIntFromRange(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
+var randomColor = function randomColor(colors) {
+    return colors[Math.floor(Math.random() * colors.length)];
+};
+
 // Objects
-function Ball(x, y, radius, color) {
+function Ball(x, y, dx, dy, radius, color) {
+    var _this = this;
+
     this.x = x;
     this.y = y;
+    this.dx = dx;
+    this.dy = dy;
     this.radius = radius;
     this.color = color;
+
+    this.update = function () {
+        if (_this.y + _this.radius + _this.dy > canvas.height) {
+            _this.dy = -_this.dy * friction;
+        } else {
+            _this.dy += gravity;
+        }
+
+        if (_this.x + _this.radius + _this.dx > canvas.width || _this.x - _this.radius <= 0) {
+            _this.dx = -_this.dx;
+        }
+
+        _this.x += _this.dx;
+        _this.y += _this.dy;
+        _this.draw();
+    };
+
+    this.draw = function () {
+        c.beginPath();
+        c.arc(_this.x, _this.y, _this.radius, 0, Math.PI * 2, false);
+        c.fillStyle = _this.color;
+        c.fill();
+        c.stroke();
+        c.closePath();
+    };
 }
-
-Object.prototype.draw = function () {
-    c.beginPath();
-    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-    c.fillStyle = this.color;
-    c.fill();
-    c.closePath();
-};
-
-Object.prototype.update = function () {
-    this.draw();
-};
 
 // Implementation
-var objects = void 0;
-function init() {
-    objects = [];
+var ballArray = [];
+
+var init = function init() {
+    ballArray = [];
 
     for (var i = 0; i < 400; i++) {
-        // objects.push();
+        var radius = randomIntFromRange(8, 20);
+        var x = randomIntFromRange(radius, canvas.width - radius);
+        var y = randomIntFromRange(0, canvas.height - radius);
+        var dx = randomIntFromRange(-2, 2);
+        var dy = randomIntFromRange(-2, 2);
+        var color = randomColor(colors);
+        ballArray.push(new Ball(x, y, dx, dy, radius, color));
     }
-}
+};
 
 // Animation Loop
-function animate() {
+var animate = function animate() {
     requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height);
 
-    c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y);
-    // objects.forEach(object => {
-    //  object.update();
-    // });
-}
+    for (var i = 0; i < ballArray.length; i++) {
+        ballArray[i].update();
+    }
+};
 
 init();
 animate();
