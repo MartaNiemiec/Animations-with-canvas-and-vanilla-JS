@@ -128,25 +128,45 @@ addEventListener('resize', function () {
     init();
 });
 
+// Utility Functions
+var randomIntFromRange = function randomIntFromRange(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+};
+
+var randomColor = function randomColor(colors) {
+    return colors[Math.floor(Math.random() * colors.length)];
+};
+
+function distance(x1, y1, x2, y2) {
+    var xDist = x2 - x1;
+    var yDist = y2 - y1;
+    // Use Pythagoras Theorem 
+    // Math.sqrt = return the square root of a number
+    // Math.pow = return e.g. the value of the number 4 to the power of 3 (4*4*4):
+    return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
+}
+
 // Objects
-function Object(x, y, radius, color) {
+function Particle(x, y, radius, color) {
+    var _this = this;
+
     this.x = x;
     this.y = y;
     this.radius = radius;
     this.color = color;
+
+    this.update = function () {
+        _this.draw();
+    };
+
+    this.draw = function () {
+        c.beginPath();
+        c.arc(_this.x, _this.y, _this.radius, 0, Math.PI * 2, false);
+        c.fillStyle = _this.color;
+        c.fill();
+        c.closePath();
+    };
 }
-
-Object.prototype.draw = function () {
-    c.beginPath();
-    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-    c.fillStyle = this.color;
-    c.fill();
-    c.closePath();
-};
-
-Object.prototype.update = function () {
-    this.draw();
-};
 
 // Implementation
 var objects = void 0;
@@ -163,7 +183,6 @@ function animate() {
     requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height);
 
-    c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y);
     // objects.forEach(object => {
     //  object.update();
     // });
