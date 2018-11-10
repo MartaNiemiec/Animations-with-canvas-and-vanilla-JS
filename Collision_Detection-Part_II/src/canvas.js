@@ -127,6 +127,7 @@ function Particle(x, y, radius, color) {
     this.radius = radius;
     this.color = color;
     this.mass = 1;
+    this.opacity = 0;
     
     this.update = particles => {
         this.draw();
@@ -146,7 +147,15 @@ function Particle(x, y, radius, color) {
             this.velocity.y = -this.velocity.y;
         }
        
-    
+        // MOUSE COLLISION DETECTION
+        if (distance(mouse.x, mouse.y, this.x, this.y) < 120 && this.opacity < 0.3) {
+            this.opacity += 0.02;
+        } else if (this.opacity > 0) {
+            this.opacity -= 0.02;
+
+            // preventing the opacity to never go below 0 or 0.3
+            this.opacity = Math.max(0, this.opacity);   
+        }
 
         this.x += this.velocity.x;
         this.y += this.velocity.y;
@@ -155,6 +164,13 @@ function Particle(x, y, radius, color) {
     this.draw = () => {
         c.beginPath();
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+
+        c.save();  // save the current state ot the canvas at this specific point and time
+        c.globalAlpha = this.opacity;    // opacity
+        c.fillStyle = this.color;
+        c.fill();
+        c.restore();
+
         c.strokeStyle = this.color;
         c.stroke();
         c.closePath();
